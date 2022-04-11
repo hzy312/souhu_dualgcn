@@ -1,0 +1,10 @@
+python main.py \
+--max_epochs 20 \
+--accumulate_grad_batches 1 \
+--lr 1e-3 \
+--batch_size 64 \
+--gradient_clip_val 5 \
+--gpus -1 \
+--warmup_steps 1000 \
+--train_data_path ./data_preprocess/train_processed.txt \
+--predict_data_path ./data_preprocess/test_processed.txt \
