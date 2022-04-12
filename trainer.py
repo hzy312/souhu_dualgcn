@@ -24,12 +24,16 @@ class SOUHUModule(pl.LightningModule):
         super(SOUHUModule, self).__init__()
         self.opt = opt
         self.save_hyperparameters()
-        self.data_module = SOUHUDataModule(self.opt)
+        if self.opt.state == 'train':
+            self.data_module = SOUHUDataModule(self.opt)
         self.bert = AutoModel.from_pretrained(opt.plm_path)
         self.model = DualGCNBertClassifier(self.bert, self.opt)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.F1 = F1Score(num_classes=opt.polarities_dim)
-        self._initialize()
+        if self.opt.state == 'train':
+            self._initialize()
+        elif self.opt.state == 'pred':
+            self.model.eval()
 
     def _initialize(self):
         for p in self.model.parameters():
@@ -63,7 +67,7 @@ class SOUHUModule(pl.LightningModule):
         return [optimizer], [{"scheduler": scheduler, "interval": "step"}]
 
     def _compute_loss_and_predictions(self, batch):
-        label= batch['label']
+        label = batch['label']
         logits, penal = self.model(batch)
         loss = self.criterion(logits, label)
         loss = loss + penal
@@ -97,10 +101,9 @@ class SOUHUModule(pl.LightningModule):
         entity = batch['entity']
         logits, _ = self.model(batch)
         pred = logits.argmax(dim=-1)
-        results = list(zip(idx, entity, pred))
-        results = [[int(ins[0]), ins[1], int(ins[2])-2] for ins in results]
+        results = list(zip(idx.cpu(), entity, pred.cpu()))
+        results = [[int(ins[0]), ins[1], int(ins[2]) - 2] for ins in results]
         return results
-
 
     def train_dataloader(self) -> TRAIN_DATALOADERS:
         return self.data_module.train_dataloader()

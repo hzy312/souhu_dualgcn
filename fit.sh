@@ -8,3 +8,4 @@ python main.py \
 --warmup_steps 1000 \
 --train_data_path ./data_preprocess/train_processed.txt \
 --predict_data_path ./data_preprocess/test_processed.txt \
+--state train

@@ -54,5 +54,7 @@ def get_parser():
                         type=float, default=0.98, help='train val split')
     parser.add_argument('--lr',
                         type=float, default=1e-3, help='initial learning rate')
+    parser.add_argument('--state',
+                        type=str, required=True, help='train or predict')
 
     return parser
